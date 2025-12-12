@@ -1,13 +1,13 @@
-
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
 import {
   Loader2, UploadCloud, CheckCircle, Thermometer, Activity,
-  Volume2, Gauge, Clock, AlertTriangle, Eye, Server, MapPin, Lock
+  Volume2, Gauge, Clock, AlertTriangle, Eye, Server, MapPin, Lock,
+  FileText, X // Added these icons
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -19,17 +19,21 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 
-import { analyzeMachine } from "@/actions/aiActions"; // Ensure path is correct
+import { analyzeMachine } from "@/actions/aiActions";
 import useFetch from "@/hooks/use-fetch";
 
 export default function NewScanForm({ machines, userCredits = 0, userPlan = "FREE" }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const preselectedId = searchParams.get("preselect");
+  const fileInputRef = useRef(null); // Reference to clear file input
 
   const [selectedMachine, setSelectedMachine] = useState(preselectedId || "");
   const [submissionType, setSubmissionType] = useState("FILE_UPLOAD");
   const [loadValue, setLoadValue] = useState([50]);
+  
+  // New State for File Preview
+  const [selectedFile, setSelectedFile] = useState(null);
 
   const { fn: analyzeFn, loading, data: result, error: fetchError } = useFetch(analyzeMachine);
 
@@ -40,24 +44,33 @@ export default function NewScanForm({ machines, userCredits = 0, userPlan = "FRE
 
   // --- RESULT HANDLING ---
   useEffect(() => {
-    // 1. Success Case
     if (result?.success && result?.reportId) {
       toast.success("Analysis Complete!");
       router.push(`/dashboard/reports/${result.reportId}`);
-    }
-    // 2. Specific Logic Failure (returned from Server Action)
-    else if (result?.success === false) {
+    } else if (result?.success === false) {
       toast.error(result.error || "Analysis failed. Please try again.");
     }
   }, [result, router]);
 
-  // --- NETWORK ERROR HANDLING ---
   useEffect(() => {
     if (fetchError) {
       toast.error(fetchError.message || "Network error. Please try again.");
     }
   }, [fetchError]);
 
+  // --- FILE HANDLERS ---
+  const handleFileChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      setSelectedFile(e.target.files[0]);
+    }
+  };
+
+  const clearFile = () => {
+    setSelectedFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ""; // Reset the actual input value
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -73,12 +86,17 @@ export default function NewScanForm({ machines, userCredits = 0, userPlan = "FRE
       return;
     }
 
+    // Validation: Ensure file is present if in File Upload mode
+    if (submissionType === "FILE_UPLOAD" && !selectedFile) {
+        toast.error("Please upload a document.");
+        return;
+    }
+
     const formData = new FormData(e.currentTarget);
     formData.append("machineId", selectedMachine);
     formData.append("submissionType", submissionType);
     formData.append("operating_load", loadValue[0]);
 
-    // Trigger the server action
     await analyzeFn(formData);
   };
 
@@ -108,7 +126,6 @@ export default function NewScanForm({ machines, userCredits = 0, userPlan = "FRE
           <div className="space-y-4">
             <Tabs defaultValue="FILE_UPLOAD" onValueChange={setSubmissionType} className="w-full">
 
-              {/* UPDATED TABS LIST: Stacks on mobile (grid-cols-1), Side-by-side on Desktop (md:grid-cols-2) */}
               <TabsList className="grid w-full grid-cols-1 md:grid-cols-2 bg-slate-950 border border-slate-800 h-auto md:h-12 p-1 gap-2 md:gap-0">
                 <TabsTrigger
                   value="FILE_UPLOAD"
@@ -126,36 +143,83 @@ export default function NewScanForm({ machines, userCredits = 0, userPlan = "FRE
 
               {/* FILE UPLOAD TAB */}
               <TabsContent value="FILE_UPLOAD" className="mt-6 animate-in fade-in slide-in-from-top-2">
-                <div className="border-2 border-dashed border-slate-700 rounded-lg p-12 text-center hover:border-blue-500/50 transition-colors bg-slate-950/50 relative">
-                  <Input type="file" name="file" accept="image/*,application/pdf" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" />
-                  <div className="flex flex-col items-center gap-4 z-10">
-                    <UploadCloud className="w-10 h-10 text-blue-400" />
-                    <div className="text-slate-300">
-                      <span className="text-blue-400 font-semibold">Upload Maintenance Log</span> or Invoice
+                
+                {/* Visual Logic: Show Dropzone OR Selected File */}
+                {!selectedFile ? (
+                  <div className="border-2 border-dashed border-slate-700 rounded-lg p-12 text-center hover:border-blue-500/50 transition-colors bg-slate-950/50 relative group">
+                    <Input 
+                        ref={fileInputRef}
+                        type="file" 
+                        name="file" 
+                        accept="image/*,application/pdf" 
+                        onChange={handleFileChange}
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" 
+                    />
+                    <div className="flex flex-col items-center gap-4 z-10">
+                      <div className="p-4 bg-slate-900 rounded-full group-hover:bg-slate-800 transition-colors">
+                        <UploadCloud className="w-10 h-10 text-blue-400" />
+                      </div>
+                      <div className="text-slate-300">
+                        <span className="text-blue-400 font-semibold">Click to Upload</span> or drag and drop
+                      </div>
+                      <p className="text-xs text-slate-500">PDF, JPG, PNG (Max 10MB)</p>
                     </div>
-                    <p className="text-xs text-slate-500">PDF, JPG, PNG supported</p>
                   </div>
-                </div>
+                ) : (
+                  <div className="border border-slate-700 bg-slate-800/50 rounded-lg p-4 flex items-center justify-between animate-in fade-in zoom-in-95">
+                    <div className="flex items-center gap-4">
+                        <div className="p-3 bg-blue-500/10 rounded-lg">
+                            <FileText className="w-8 h-8 text-blue-400" />
+                        </div>
+                        <div>
+                            <p className="text-white font-medium text-sm truncate max-w-50 md:max-w-md">
+                                {selectedFile.name}
+                            </p>
+                            <p className="text-slate-500 text-xs">
+                                {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
+                            </p>
+                        </div>
+                    </div>
+                    <Button 
+                        type="button" 
+                        variant="ghost" 
+                        onClick={clearFile}
+                        className="text-slate-400 hover:text-red-400 hover:bg-red-400/10"
+                    >
+                        <X className="w-5 h-5" />
+                    </Button>
+                    
+                    {/* Hidden input to ensure FormData still picks it up if needed, though usually clearing state handles logic */}
+                    <Input 
+                        ref={fileInputRef}
+                        type="file" 
+                        name="file" 
+                        className="hidden" 
+                        onChange={handleFileChange}
+                    /> 
+                  </div>
+                )}
               </TabsContent>
 
               {/* UNIVERSAL MANUAL ENTRY TAB */}
               <TabsContent value="MANUAL_ENTRY" className="mt-6 animate-in fade-in slide-in-from-top-2">
-                <div className="grid gap-8 p-6 rounded-lg border border-slate-800 bg-slate-950/50">
-                  {/* 1. Core Metrics */}
+                 <div className="grid gap-8 p-6 rounded-lg border border-slate-800 bg-slate-950/50">
+                  {/* ... (Same manual entry fields as before) ... */}
                   <div className="space-y-4">
                     <h3 className="text-sm font-semibold text-blue-400 uppercase tracking-wider">1. Core Telemetry</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-2">
-                        <Label className="text-slate-300 flex items-center gap-2"><Thermometer className="w-4 h-4 text-orange-400" /> Primary Metric (Temp/CPU)</Label>
+                        <Label className="text-slate-300 flex items-center gap-2"><Thermometer className="w-4 h-4 text-orange-400" /> Primary Metric</Label>
                         <Input name="primary_metric" placeholder="e.g. 85°C or 90% CPU" className="bg-slate-900 border-slate-700 text-slate-100" />
                       </div>
                       <div className="space-y-2">
-                        <Label className="text-slate-300 flex items-center gap-2"><Gauge className="w-4 h-4 text-purple-400" /> Secondary Metric (Press/RAM)</Label>
+                        <Label className="text-slate-300 flex items-center gap-2"><Gauge className="w-4 h-4 text-purple-400" /> Secondary Metric</Label>
                         <Input name="secondary_metric" placeholder="e.g. 2000 RPM" className="bg-slate-900 border-slate-700 text-slate-100" />
                       </div>
                     </div>
                   </div>
-                  {/* 2. Operational */}
+                  
+                  {/* ... (Keeping your existing manual fields) ... */}
                   <div className="space-y-4">
                     <h3 className="text-sm font-semibold text-blue-400 uppercase tracking-wider">2. Operational Context</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -169,8 +233,8 @@ export default function NewScanForm({ machines, userCredits = 0, userPlan = "FRE
                       </div>
                     </div>
                   </div>
-                  {/* 3. Signals */}
-                  <div className="space-y-4">
+
+                   <div className="space-y-4">
                     <h3 className="text-sm font-semibold text-blue-400 uppercase tracking-wider">3. Signals & Indicators</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-2">
@@ -191,7 +255,7 @@ export default function NewScanForm({ machines, userCredits = 0, userPlan = "FRE
                       </div>
                     </div>
                   </div>
-                  {/* 4. Environment */}
+
                   <div className="space-y-4">
                     <h3 className="text-sm font-semibold text-blue-400 uppercase tracking-wider">4. Environment</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -213,20 +277,20 @@ export default function NewScanForm({ machines, userCredits = 0, userPlan = "FRE
                       </div>
                     </div>
                   </div>
-                  {/* 5. Notes */}
+
                   <div className="space-y-2 pt-4 border-t border-slate-800">
                     <Label className="text-slate-300">Detailed Notes</Label>
                     <Textarea name="textInput" placeholder="Describe the issue..." className="min-h-25 bg-slate-900 border-slate-700 text-slate-200" />
                   </div>
-                </div>
+                 </div>
               </TabsContent>
             </Tabs>
           </div>
 
-          {/* --- C. SUBMIT BUTTON (WITH CREDIT CHECK) --- */}
+          {/* --- C. SUBMIT BUTTON --- */}
           {canScan ? (
             <Button type="submit" disabled={loading} className="w-full bg-linear-to-r from-blue-600 to-cyan-600 text-white h-12 text-lg font-medium shadow-lg hover:scale-[1.01] transition-transform">
-              {loading ? <><Loader2 className="w-5 h-5 animate-spin mr-2" /> AI Analyzing (Auto-Retrying if busy)...</> : <><CheckCircle className="w-5 h-5 mr-2" /> Run Universal Analysis</>}
+              {loading ? <><Loader2 className="w-5 h-5 animate-spin mr-2" /> AI Analyzing...</> : <><CheckCircle className="w-5 h-5 mr-2" /> Run Universal Analysis</>}
             </Button>
           ) : (
             <div className="flex flex-col gap-3">
@@ -234,7 +298,7 @@ export default function NewScanForm({ machines, userCredits = 0, userPlan = "FRE
                 <Lock className="w-5 h-5 mr-2" /> Insufficient Credits
               </Button>
               <div className="text-center">
-                <Link href="/pricing" className="text-blue-400 hover:underline text-sm font-medium">Buy more credits to continue using AI</Link>
+                <Link href="/pricing" className="text-blue-400 hover:underline text-sm font-medium">Buy more credits</Link>
               </div>
             </div>
           )}
