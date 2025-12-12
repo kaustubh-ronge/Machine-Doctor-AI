@@ -19,7 +19,7 @@ export default async function PricingPage() {
   const plans = [
     {
       name: "Standard Pack",
-      price: 499,
+      price: 399,
       credits: 20,
       features: [
         "20 AI Analyses / Month",
@@ -32,7 +32,7 @@ export default async function PricingPage() {
     },
     {
       name: "Pro Enterprise",
-      price: 1999,
+      price: 799,
       credits: 100,
       features: [
         "100 AI Analyses / Month",
