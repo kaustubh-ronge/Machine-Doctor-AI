@@ -1,3 +1,5 @@
+
+
 "use client";
 
 import { SignInButton, UserButton, SignedIn, SignedOut } from "@clerk/nextjs";
@@ -39,21 +41,25 @@ export default function HeaderActions({ dbUser }) {
 
       {/* --- GUEST STATE --- */}
       <SignedOut>
-        <SignInButton mode="modal">
-          <Button variant="ghost" className="text-slate-300 hover:text-white hover:bg-white/10">
-            Sign In
-          </Button>
-        </SignInButton>
-        
-        <SignInButton mode="modal">
-          <Button className="bg-white text-black hover:bg-slate-200 transition-colors font-semibold">
-            Get Started
-          </Button>
-        </SignInButton>
+        {/* UPDATED: Added 'hidden md:flex' so these buttons DON'T show on mobile */}
+        <div className="hidden md:flex items-center gap-2">
+            <SignInButton mode="modal">
+            <Button variant="ghost" className="text-slate-300 hover:text-white hover:bg-white/10">
+                Sign In
+            </Button>
+            </SignInButton>
+            
+            <SignInButton mode="modal">
+            <Button className="bg-white text-black hover:bg-slate-200 transition-colors font-semibold">
+                Get Started
+            </Button>
+            </SignInButton>
+        </div>
       </SignedOut>
 
       {/* --- MOBILE MENU (Sheet) --- */}
-      <div className="lg:hidden">
+      {/* UPDATED: Changed 'lg:hidden' to 'xl:hidden' to match the Header nav */}
+      <div className="xl:hidden">
         <Sheet>
           <SheetTrigger asChild>
             <Button variant="ghost" size="icon" className="text-slate-300 hover:text-white hover:bg-white/10">
@@ -105,7 +111,7 @@ export default function HeaderActions({ dbUser }) {
                <SheetClose asChild>
                   <Link href="/dashboard/payments" className="flex items-center gap-3 p-2 hover:bg-white/5 rounded-md text-slate-300 hover:text-white">
                       <CreditCard className="w-5 h-5" />
-                      Old Payments
+                      Past Payments
                   </Link>
                </SheetClose>
 

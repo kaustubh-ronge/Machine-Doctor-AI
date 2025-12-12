@@ -1,11 +1,10 @@
+
 import Link from "next/link";
 import HeaderActions from "./HeaderActions";
 import { Activity } from "lucide-react";
-import { checkUser } from "@/lib/checkUser"; // Import your sync logic
+import { checkUser } from "@/lib/checkUser"; 
 
 export default async function Header() {
-  // 1. Fetch User Data on the Server
-  // This runs before the HTML is sent to the browser
   const dbUser = await checkUser();
 
   return (
@@ -19,12 +18,13 @@ export default async function Header() {
               <Activity className="w-5 h-5 text-white" />
             </div>
             <span className="font-bold text-xl tracking-tight text-white">
-              Machine<span className="text-blue-500">Health</span>
+              Machine<span className="text-blue-500">Doctor</span>
             </span>
           </Link>
 
           {/* --- DESKTOP NAVIGATION --- */}
-          <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-slate-400">
+          {/* UPDATED: Changed 'md:flex' to 'xl:flex' so links hide on smaller laptops */}
+          <nav className="hidden xl:flex items-center gap-6 text-sm font-medium text-slate-400">
             <Link href="/dashboard" className="hover:text-blue-400 transition-colors">
               Dashboard
             </Link>
@@ -38,13 +38,12 @@ export default async function Header() {
               Pricing
             </Link>
             <Link href="/dashboard/payments" className="hover:text-blue-400 transition-colors">
-              Old Payments
+              Past Payments
             </Link>
           </nav>
         </div>
 
         {/* --- ACTIONS (Client Side) --- */}
-        {/* We pass the fetched dbUser to the client component */}
         <HeaderActions dbUser={dbUser} />
       </div>
     </header>

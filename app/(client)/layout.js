@@ -13,7 +13,7 @@ const ClientLayout = ({ children }) => {
                 disableTransitionOnChange
             >
                 <Header />
-                <main className='flex-1'>{children}</main>
+                <main className='flex-1 overflow-x-hidden'>{children}</main>
                 <Toaster position="top-center" richColors />
             </ThemeProvider>
         </div>
