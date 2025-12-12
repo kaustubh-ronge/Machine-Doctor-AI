@@ -44,7 +44,7 @@ export default function NewScanForm({ machines, userCredits = 0, userPlan = "FRE
     if (result?.success && result?.reportId) {
       toast.success("Analysis Complete!");
       router.push(`/dashboard/reports/${result.reportId}`);
-    } 
+    }
     // 2. Specific Logic Failure (returned from Server Action)
     else if (result?.success === false) {
       toast.error(result.error || "Analysis failed. Please try again.");
@@ -54,7 +54,7 @@ export default function NewScanForm({ machines, userCredits = 0, userPlan = "FRE
   // --- NETWORK ERROR HANDLING ---
   useEffect(() => {
     if (fetchError) {
-       toast.error(fetchError.message || "Network error. Please try again.");
+      toast.error(fetchError.message || "Network error. Please try again.");
     }
   }, [fetchError]);
 
@@ -107,11 +107,19 @@ export default function NewScanForm({ machines, userCredits = 0, userPlan = "FRE
           {/* --- B. INPUT METHOD --- */}
           <div className="space-y-4">
             <Tabs defaultValue="FILE_UPLOAD" onValueChange={setSubmissionType} className="w-full">
-              <TabsList className="grid w-full grid-cols-2 bg-slate-950 border border-slate-800 h-12 p-1">
-                <TabsTrigger value="FILE_UPLOAD" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white h-full rounded-md">
+
+              {/* UPDATED TABS LIST: Stacks on mobile (grid-cols-1), Side-by-side on Desktop (md:grid-cols-2) */}
+              <TabsList className="grid w-full grid-cols-1 md:grid-cols-2 bg-slate-950 border border-slate-800 h-auto md:h-12 p-1 gap-2 md:gap-0">
+                <TabsTrigger
+                  value="FILE_UPLOAD"
+                  className="data-[state=active]:bg-blue-600 data-[state=active]:text-white h-10 md:h-full rounded-md"
+                >
                   <UploadCloud className="w-4 h-4 mr-2" /> Upload Logs/Docs
                 </TabsTrigger>
-                <TabsTrigger value="MANUAL_ENTRY" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white h-full rounded-md">
+                <TabsTrigger
+                  value="MANUAL_ENTRY"
+                  className="data-[state=active]:bg-blue-600 data-[state=active]:text-white h-10 md:h-full rounded-md"
+                >
                   <Activity className="w-4 h-4 mr-2" /> Manual Diagnostics
                 </TabsTrigger>
               </TabsList>
