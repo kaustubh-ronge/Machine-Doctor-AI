@@ -25,7 +25,7 @@ export default function HeaderActions({ dbUser }) {
           </Button>
         </Link>
         
-        <Link href="/scan">
+        <Link href="/dashboard/scan">
             <Button size="sm" className="hidden sm:flex bg-linear-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white shadow-lg shadow-blue-500/20 border-0">
             <Sparkles className="w-4 h-4 mr-2" />
             New Scan
@@ -84,7 +84,7 @@ export default function HeaderActions({ dbUser }) {
                     </Link>
                   </SheetClose>
                   <SheetClose asChild>
-                    <Link href="/scan" className="flex items-center gap-3 p-2 hover:bg-white/5 rounded-md text-blue-400 hover:text-blue-300 transition-colors">
+                    <Link href="/dashboard/scan" className="flex items-center gap-3 p-2 hover:bg-white/5 rounded-md text-blue-400 hover:text-blue-300 transition-colors">
                         <Sparkles className="w-5 h-5" />
                         New AI Scan
                     </Link>
@@ -100,6 +100,12 @@ export default function HeaderActions({ dbUser }) {
                   <Link href="/pricing" className="flex items-center gap-3 p-2 hover:bg-white/5 rounded-md text-slate-300 hover:text-white">
                       <CreditCard className="w-5 h-5" />
                       Pricing
+                  </Link>
+               </SheetClose>
+               <SheetClose asChild>
+                  <Link href="/dashboard/payments" className="flex items-center gap-3 p-2 hover:bg-white/5 rounded-md text-slate-300 hover:text-white">
+                      <CreditCard className="w-5 h-5" />
+                      Old Payments
                   </Link>
                </SheetClose>
 

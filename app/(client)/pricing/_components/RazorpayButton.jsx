@@ -32,6 +32,23 @@ export default function RazorpayButton({ planName, amount, credits, children }) 
       name: "Machine Doctor AI",
       description: `Purchase ${planName} Plan`,
       order_id: result.orderId,
+      
+      // --- NEW CONFIGURATION START ---
+      // This block restricts the payment methods
+      config: {
+        display: {
+          hide: [
+            { method: "emi" },
+            { method: "wallet" },
+            { method: "paylater" }
+          ],
+          preferences: {
+            show_default_blocks: true, // Keep the default UI for the allowed methods
+          },
+        },
+      },
+      // --- NEW CONFIGURATION END ---
+
       handler: async function (response) {
         // 3. Verify Payment on Server
         const verifyResult = await verifyPayment(response);
@@ -43,7 +60,6 @@ export default function RazorpayButton({ planName, amount, credits, children }) 
         }
       },
       prefill: {
-        // You can prefill user details here if you have them in props
         name: "", 
         email: "",
       },

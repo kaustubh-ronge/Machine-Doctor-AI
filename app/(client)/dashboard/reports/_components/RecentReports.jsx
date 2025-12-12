@@ -70,7 +70,7 @@ export default function RecentReports({ reports }) {
                     {format(new Date(report.createdAt), "MMM d, yyyy")}
                   </TableCell>
                   <TableCell className="text-right pr-4">
-                    <Link href={`/dashboard/report/${report.id}`}>
+                    <Link href={`/dashboard/reports/${report.id}`}>
                         <Button size="sm" variant="ghost" className="hover:bg-blue-600 hover:text-white text-slate-400">
                             <FileText className="w-4 h-4" />
                         </Button>

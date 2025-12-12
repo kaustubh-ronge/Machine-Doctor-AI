@@ -114,15 +114,52 @@ export async function getUserTransactions() {
 }
 
 // Fetch all transactions for current user (most recent first)
+// Fetch all transactions but hide duplicate PENDING entries
+// Fetch all transactions but hide duplicate/stale PENDING entries
 export async function getTransactions() {
   const { userId } = await auth();
   if (!userId) return [];
 
   try {
-    return await prisma.transaction.findMany({
+    // 1. Fetch ALL transactions sorted by newest first
+    const allTx = await prisma.transaction.findMany({
       where: { userId },
       orderBy: { createdAt: "desc" },
     });
+
+    // 2. Filter logic
+    const resolvedPlans = new Set();
+
+    const cleanedTx = allTx.filter((tx) => {
+      // A) ALWAYS keep SUCCESS or FAILED transactions for history
+      if (tx.status === "SUCCESS") {
+        // If we see a SUCCESS, mark this plan as "resolved" 
+        // so any OLDER pending attempts for this plan get hidden.
+        if (tx.planType) resolvedPlans.add(tx.planType);
+        return true;
+      }
+      
+      if (tx.status === "FAILED") {
+         return true; 
+      }
+
+      // B) Handle PENDING transactions
+      if (tx.status === "PENDING") {
+        // If we have already seen a newer SUCCESS or PENDING for this plan, hide this one.
+        if (tx.planType && resolvedPlans.has(tx.planType)) {
+          return false; // SKIP: This is a stale duplicate
+        }
+        
+        // Otherwise, show it, and mark plan as seen/resolved
+        if (tx.planType) resolvedPlans.add(tx.planType);
+        return true;
+      }
+
+      return true;
+    });
+
+    return cleanedTx;
+
   } catch (error) {
     console.error("Failed to fetch transactions:", error);
     return [];

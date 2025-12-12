@@ -37,6 +37,9 @@ export default async function Header() {
             <Link href="/pricing" className="hover:text-blue-400 transition-colors">
               Pricing
             </Link>
+            <Link href="/dashboard/payments" className="hover:text-blue-400 transition-colors">
+              Old Payments
+            </Link>
           </nav>
         </div>
 

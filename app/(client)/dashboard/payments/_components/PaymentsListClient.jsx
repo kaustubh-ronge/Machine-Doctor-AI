@@ -5,7 +5,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from "@/components/ui/button";
 import { resumePayment, generateReceipt } from "@/actions/paymentActions";
 import Script from "next/script";
-import { format } from "date-fns";
 import { toast } from "sonner";
 
 export default function PaymentsListClient({ transactions = [] }) {
@@ -22,7 +21,7 @@ export default function PaymentsListClient({ transactions = [] }) {
       return;
     }
 
-    // Open Razorpay modal using order id (client uses same flow as RazorpayButton)
+    // Open Razorpay modal using existing order id
     if (typeof window !== "undefined" && res.orderId) {
       const options = {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
@@ -31,9 +30,27 @@ export default function PaymentsListClient({ transactions = [] }) {
         currency: "INR",
         name: "Machine Doctor AI",
         description: "Resume Payment",
+        
+        // --- ADDED CONFIGURATION HERE ---
+        config: {
+          display: {
+            hide: [
+              { method: "emi" },
+              { method: "wallet" },
+              { method: "paylater" }
+            ],
+            preferences: {
+              show_default_blocks: true,
+            },
+          },
+        },
+        // -------------------------------
+
         handler: function (response) {
-          // Let the server-side verify flow (the existing verifyPayment action will be invoked by other UI flows)
           toast.success("Payment handled — please refresh to update status.");
+          // Ideally, trigger a server verification action here if needed, 
+          // or rely on the webhook/manual refresh as per your current flow.
+          window.location.reload(); 
         },
       };
 
@@ -49,7 +66,6 @@ export default function PaymentsListClient({ transactions = [] }) {
   };
 
   const downloadReceipt = (receipt) => {
-    // Render a simple printable HTML and open in new window
     const html = `
       <html>
         <head><title>Receipt - ${receipt.id}</title></head>
@@ -57,7 +73,7 @@ export default function PaymentsListClient({ transactions = [] }) {
           <h2>Machine Doctor AI — Receipt</h2>
           <p><strong>ID:</strong> ${receipt.id}</p>
           <p><strong>User:</strong> ${receipt.user.name || receipt.user.email}</p>
-          <p><strong>Amount:</strong> ${receipt.amount}</p>
+          <p><strong>Amount:</strong> ₹${receipt.amount}</p>
           <p><strong>Status:</strong> ${receipt.status}</p>
           <p><strong>Date:</strong> ${new Date(receipt.createdAt).toLocaleString()}</p>
         </body>

@@ -1,8 +1,9 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import Link from "next/link"; // Required for the recharge link
+import Link from "next/link";
 import { toast } from "sonner";
 import {
   Loader2, UploadCloud, CheckCircle, Thermometer, Activity,
@@ -18,10 +19,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 
-import { analyzeMachine } from "@/actions/aiActions";
+import { analyzeMachine } from "@/actions/aiActions"; // Ensure path is correct
 import useFetch from "@/hooks/use-fetch";
 
-// Updated props to receive userCredits and userPlan
 export default function NewScanForm({ machines, userCredits = 0, userPlan = "FREE" }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -31,24 +31,37 @@ export default function NewScanForm({ machines, userCredits = 0, userPlan = "FRE
   const [submissionType, setSubmissionType] = useState("FILE_UPLOAD");
   const [loadValue, setLoadValue] = useState([50]);
 
-  const { fn: analyzeFn, loading, data: result } = useFetch(analyzeMachine);
+  const { fn: analyzeFn, loading, data: result, error: fetchError } = useFetch(analyzeMachine);
 
-  // --- LOGIC: CHECK CREDITS ---
+  // Logic: Check Credits
   const isPro = userPlan === "PRO";
   const hasCredits = userCredits > 0;
   const canScan = isPro || hasCredits;
 
+  // --- RESULT HANDLING ---
   useEffect(() => {
+    // 1. Success Case
     if (result?.success && result?.reportId) {
       toast.success("Analysis Complete!");
-      router.push(`/dashboard/report/${result.reportId}`);
+      router.push(`/dashboard/reports/${result.reportId}`);
+    } 
+    // 2. Specific Logic Failure (returned from Server Action)
+    else if (result?.success === false) {
+      toast.error(result.error || "Analysis failed. Please try again.");
     }
   }, [result, router]);
+
+  // --- NETWORK ERROR HANDLING ---
+  useEffect(() => {
+    if (fetchError) {
+       toast.error(fetchError.message || "Network error. Please try again.");
+    }
+  }, [fetchError]);
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Stop if no credits
     if (!canScan) {
       toast.error("Insufficient credits. Please upgrade.");
       router.push("/pricing");
@@ -65,6 +78,7 @@ export default function NewScanForm({ machines, userCredits = 0, userPlan = "FRE
     formData.append("submissionType", submissionType);
     formData.append("operating_load", loadValue[0]);
 
+    // Trigger the server action
     await analyzeFn(formData);
   };
 
@@ -204,7 +218,7 @@ export default function NewScanForm({ machines, userCredits = 0, userPlan = "FRE
           {/* --- C. SUBMIT BUTTON (WITH CREDIT CHECK) --- */}
           {canScan ? (
             <Button type="submit" disabled={loading} className="w-full bg-linear-to-r from-blue-600 to-cyan-600 text-white h-12 text-lg font-medium shadow-lg hover:scale-[1.01] transition-transform">
-              {loading ? <><Loader2 className="w-5 h-5 animate-spin mr-2" /> Processing...</> : <><CheckCircle className="w-5 h-5 mr-2" /> Run Universal Analysis</>}
+              {loading ? <><Loader2 className="w-5 h-5 animate-spin mr-2" /> AI Analyzing (Auto-Retrying if busy)...</> : <><CheckCircle className="w-5 h-5 mr-2" /> Run Universal Analysis</>}
             </Button>
           ) : (
             <div className="flex flex-col gap-3">
