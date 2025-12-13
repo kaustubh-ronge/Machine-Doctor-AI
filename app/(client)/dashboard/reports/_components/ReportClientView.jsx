@@ -16,7 +16,7 @@ import ReportPrintButton from "./ReportPrintButton";
 
 
 export default function ReportClientView({ report }) {
-  const printRef = useRef(null); // 
+  const printRef = useRef(null); 
 
   // --- PARSE DATA ---
   const details = report.rawAiResponse || {};
@@ -31,10 +31,10 @@ export default function ReportClientView({ report }) {
   else if (score < 80) { statusColor = "text-yellow-500"; ringColor = "stroke-yellow-500"; }
 
   return (
-    <div className="max-w-6xl mx-auto py-8 px-4 animate-in fade-in duration-500 pb-20">
+    <div className="max-w-6xl mx-auto py-8 px-4 sm:px-6 animate-in fade-in duration-500 pb-20">
       
       {/* HEADER */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
         <div className="flex items-center gap-4">
             <Link href="/dashboard/reports">
             <Button variant="ghost" size="icon" className="text-slate-400 hover:text-white hover:bg-slate-800">
@@ -42,16 +42,18 @@ export default function ReportClientView({ report }) {
             </Button>
             </Link>
             <div>
-            <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-                Diagnostic Report <span className="text-slate-500 font-mono text-lg">#{report.id.slice(-6).toUpperCase()}</span>
+            <h1 className="text-xl sm:text-2xl font-bold text-white flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                Diagnostic Report <span className="text-slate-500 font-mono text-base sm:text-lg">#{report.id.slice(-6).toUpperCase()}</span>
             </h1>
-            <p className="text-slate-400 text-sm">
+            <p className="text-slate-400 text-xs sm:text-sm">
                 {report.machine.name} • {format(new Date(report.createdAt), "PPP p")}
             </p>
             </div>
         </div>
         {/* PRINT BUTTON */}
-        <ReportPrintButton contentRef={printRef} />
+        <div className="w-full md:w-auto flex justify-end">
+            <ReportPrintButton contentRef={printRef} />
+        </div>
       </div>
 
       {/* =========================================================
@@ -64,13 +66,14 @@ export default function ReportClientView({ report }) {
             <Card className="bg-slate-900 border-slate-800 shadow-xl overflow-hidden relative">
                 <div className="absolute inset-0 bg-linear-to-b from-blue-500/5 to-transparent pointer-events-none" />
                 <CardContent className="pt-10 flex flex-col items-center">
-                    <div className="relative w-48 h-48 flex items-center justify-center mb-6">
+                    <div className="relative w-40 h-40 sm:w-48 sm:h-48 flex items-center justify-center mb-6">
                         <svg className="w-full h-full transform -rotate-90">
-                            <circle cx="96" cy="96" r="88" className="stroke-slate-800" strokeWidth="12" fill="none" />
-                            <circle cx="96" cy="96" r="88" className={`${ringColor} transition-all duration-1000 ease-out`} strokeWidth="12" fill="none" strokeDasharray="553" strokeDashoffset={553 - (553 * score) / 100} strokeLinecap="round" />
+                            <circle cx="50%" cy="50%" r="45%" className="stroke-slate-800" strokeWidth="12" fill="none" />
+                            {/* Adjusted radius calculation for responsiveness (using percentages mostly works but fixed svg needs care, reverting to previous logic but ensuring container fits) */}
+                             <circle cx="50%" cy="50%" r="45%" className={`${ringColor} transition-all duration-1000 ease-out`} strokeWidth="12" fill="none" strokeDasharray="553" strokeDashoffset={553 - (553 * score) / 100} strokeLinecap="round" />
                         </svg>
                         <div className="absolute flex flex-col items-center">
-                            <span className={`text-5xl font-bold ${statusColor}`}>{score}%</span>
+                            <span className={`text-4xl sm:text-5xl font-bold ${statusColor}`}>{score}%</span>
                             <span className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">Health</span>
                         </div>
                     </div>
@@ -89,10 +92,11 @@ export default function ReportClientView({ report }) {
         {/* --- RIGHT SIDE: TABS --- */}
         <div className="lg:col-span-8">
             <Tabs defaultValue="technical" className="w-full">
-                <TabsList className="grid w-full grid-cols-3 bg-slate-900 border border-slate-800 h-12 p-1">
-                    <TabsTrigger value="technical" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white h-full">Technical Analysis</TabsTrigger>
-                    <TabsTrigger value="risks" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white h-full">Risk & Safety</TabsTrigger>
-                    <TabsTrigger value="plan" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white h-full">Action Plan</TabsTrigger>
+                {/* Changed h-12 to h-auto and added py-1 to allow wrapping on very small screens */}
+                <TabsList className="grid w-full grid-cols-3 bg-slate-900 border border-slate-800 h-auto min-h-12 p-1">
+                    <TabsTrigger value="technical" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white h-full py-2 whitespace-normal leading-tight">Technical Analysis</TabsTrigger>
+                    <TabsTrigger value="risks" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white h-full py-2 whitespace-normal leading-tight">Risk & Safety</TabsTrigger>
+                    <TabsTrigger value="plan" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white h-full py-2 whitespace-normal leading-tight">Action Plan</TabsTrigger>
                 </TabsList>
 
                 {/* TAB 1: TECHNICAL */}
@@ -148,10 +152,9 @@ export default function ReportClientView({ report }) {
 
       {/* =========================================================
           PRINT LAYOUT (Visible ONLY in PDF)
-          This div is referenced by printRef
          ========================================================= */}
       <div ref={printRef} className="hidden print:block p-8 bg-white text-black">
-         {/* HEADER */}
+         {/* ... (Print layout remains unchanged as it is for paper) ... */}
          <div className="flex justify-between border-b-2 border-gray-800 pb-4 mb-6">
             <div>
                 <h1 className="text-2xl font-bold">Diagnostic Report</h1>

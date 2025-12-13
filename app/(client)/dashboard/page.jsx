@@ -15,7 +15,7 @@ export default async function DashboardPage() {
   const machines = await getMachines();
 
   return (
-    <div className="px-7 pt-5 space-y-8 animate-in fade-in duration-500">
+    <div className="px-7 overflow-hidden pt-5 space-y-8 animate-in fade-in duration-500">
 
       {/* Header Section */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-800 pb-6">

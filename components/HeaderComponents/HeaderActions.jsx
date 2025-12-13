@@ -98,6 +98,12 @@ export default function HeaderActions({ dbUser }) {
                </SignedIn>
 
                <SheetClose asChild>
+                  <Link href="/dashboard/reports" className="flex items-center gap-3 p-2 hover:bg-white/5 rounded-md text-slate-300 hover:text-white">
+                      Reports
+                  </Link>
+               </SheetClose>
+
+               <SheetClose asChild>
                   <Link href="/features" className="flex items-center gap-3 p-2 hover:bg-white/5 rounded-md text-slate-300 hover:text-white">
                       Features
                   </Link>

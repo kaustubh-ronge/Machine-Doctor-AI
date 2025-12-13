@@ -25,62 +25,64 @@ export default function RecentReports({ reports }) {
         </Link>
       </CardHeader>
       
-      {/* ... Rest of the table code remains exactly as provided previously ... */}
       <CardContent className="p-0">
-        <Table>
-          <TableHeader className="bg-slate-950">
-            <TableRow className="border-slate-800 hover:bg-transparent">
-              <TableHead className="text-slate-400 pl-4">Machine</TableHead>
-              <TableHead className="text-slate-400">Score</TableHead>
-              <TableHead className="text-slate-400">Risk Level</TableHead>
-              <TableHead className="text-slate-400 hidden sm:table-cell">Date</TableHead>
-              <TableHead className="text-right text-slate-400 pr-4">Action</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {reports.map((report) => {
-              let scoreColor = "text-green-500";
-              let badgeColor = "bg-green-500/10 text-green-500 border-green-500/20";
-              
-              if ((report.healthScore || 0) < 50) {
-                 scoreColor = "text-red-500";
-                 badgeColor = "bg-red-500/10 text-red-500 border-red-500/20";
-              } else if ((report.healthScore || 0) < 80) {
-                 scoreColor = "text-yellow-500";
-                 badgeColor = "bg-yellow-500/10 text-yellow-500 border-yellow-500/20";
-              }
-
-              return (
-                <TableRow key={report.id} className="border-slate-800 hover:bg-slate-800/50 transition-colors">
-                  <TableCell className="font-medium text-slate-200 pl-4">
-                    <div className="flex flex-col">
-                        <span>{report.machine.name}</span>
-                        <span className="text-xs text-slate-500">{report.machine.modelNumber}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                        <span className={`text-lg font-bold ${scoreColor}`}>{report.healthScore}%</span>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="outline" className={`${badgeColor} border`}>
-                        {report.riskLevel}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="hidden sm:table-cell text-slate-400 text-sm">
-                    {format(new Date(report.createdAt), "MMM d, yyyy")}
-                  </TableCell>
-                  <TableCell className="text-right pr-4">
-                    <Link href={`/dashboard/reports/${report.id}`}>
-                        <Button size="sm" variant="ghost" className="hover:bg-blue-600 hover:text-white text-slate-400">
-                            <FileText className="w-4 h-4" />
-                        </Button>
-                    </Link>
-                  </TableCell>
+        {/* Added overflow-x-auto for responsive tables */}
+        <div className="overflow-x-auto">
+            <Table>
+            <TableHeader className="bg-slate-950">
+                <TableRow className="border-slate-800 hover:bg-transparent">
+                <TableHead className="text-slate-400 pl-4 min-w-30">Machine</TableHead>
+                <TableHead className="text-slate-400">Score</TableHead>
+                <TableHead className="text-slate-400">Risk Level</TableHead>
+                <TableHead className="text-slate-400 hidden sm:table-cell min-w-25">Date</TableHead>
+                <TableHead className="text-right text-slate-400 pr-4">Action</TableHead>
                 </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+                {reports.map((report) => {
+                let scoreColor = "text-green-500";
+                let badgeColor = "bg-green-500/10 text-green-500 border-green-500/20";
+                
+                if ((report.healthScore || 0) < 50) {
+                    scoreColor = "text-red-500";
+                    badgeColor = "bg-red-500/10 text-red-500 border-red-500/20";
+                } else if ((report.healthScore || 0) < 80) {
+                    scoreColor = "text-yellow-500";
+                    badgeColor = "bg-yellow-500/10 text-yellow-500 border-yellow-500/20";
+                }
+
+                return (
+                    <TableRow key={report.id} className="border-slate-800 hover:bg-slate-800/50 transition-colors">
+                    <TableCell className="font-medium text-slate-200 pl-4">
+                        <div className="flex flex-col">
+                            <span className="truncate max-w-30 sm:max-w-none">{report.machine.name}</span>
+                            <span className="text-xs text-slate-500">{report.machine.modelNumber}</span>
+                        </div>
+                    </TableCell>
+                    <TableCell>
+                            <span className={`text-lg font-bold ${scoreColor}`}>{report.healthScore}%</span>
+                    </TableCell>
+                    <TableCell>
+                        <Badge variant="outline" className={`${badgeColor} border whitespace-nowrap`}>
+                            {report.riskLevel}
+                        </Badge>
+                    </TableCell>
+                    <TableCell className="hidden sm:table-cell text-slate-400 text-sm whitespace-nowrap">
+                        {format(new Date(report.createdAt), "MMM d, yyyy")}
+                    </TableCell>
+                    <TableCell className="text-right pr-4">
+                        <Link href={`/dashboard/reports/${report.id}`}>
+                            <Button size="sm" variant="ghost" className="hover:bg-blue-600 hover:text-white text-slate-400">
+                                <FileText className="w-4 h-4" />
+                            </Button>
+                        </Link>
+                    </TableCell>
+                    </TableRow>
+                );
+                })}
+            </TableBody>
+            </Table>
+        </div>
       </CardContent>
     </Card>
   );
