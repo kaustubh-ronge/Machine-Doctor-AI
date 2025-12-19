@@ -68,22 +68,6 @@ export default function HeroClient() {
         </Link>
       </motion.div>
 
-      {/* 5. Trust / Social Proof */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 1, delay: 0.8 }}
-        className="mt-16 pt-8 border-t border-white/5 w-full max-w-sm sm:max-w-md"
-      >
-        <p className="text-sm text-slate-500 mb-4">TRUSTED BY ENGINEERS AT</p>
-        <div className="flex justify-center items-center gap-8 opacity-50 grayscale hover:grayscale-0 transition-all duration-500">
-           {/* Placeholders for logos - you can replace with real SVGs later */}
-           <div className="h-6 w-20 bg-slate-600/30 rounded"></div>
-           <div className="h-6 w-20 bg-slate-600/30 rounded"></div>
-           <div className="h-6 w-20 bg-slate-600/30 rounded"></div>
-        </div>
-      </motion.div>
-
     </div>
   );
 }

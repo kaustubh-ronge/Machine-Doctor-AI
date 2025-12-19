@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import {
   Loader2, UploadCloud, CheckCircle, Thermometer, Activity,
   Volume2, Gauge, Clock, AlertTriangle, Eye, Server, MapPin, Lock,
-  FileText, X // Added these icons
+  FileText, X 
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -26,13 +26,14 @@ export default function NewScanForm({ machines, userCredits = 0, userPlan = "FRE
   const router = useRouter();
   const searchParams = useSearchParams();
   const preselectedId = searchParams.get("preselect");
-  const fileInputRef = useRef(null); // Reference to clear file input
+  const fileInputRef = useRef(null);
 
   const [selectedMachine, setSelectedMachine] = useState(preselectedId || "");
-  const [submissionType, setSubmissionType] = useState("FILE_UPLOAD");
-  const [loadValue, setLoadValue] = useState([50]);
   
-  // New State for File Preview
+  // 1. CHANGED DEFAULT STATE TO MANUAL_ENTRY
+  const [submissionType, setSubmissionType] = useState("MANUAL_ENTRY");
+  
+  const [loadValue, setLoadValue] = useState([50]);
   const [selectedFile, setSelectedFile] = useState(null);
 
   const { fn: analyzeFn, loading, data: result, error: fetchError } = useFetch(analyzeMachine);
@@ -68,7 +69,7 @@ export default function NewScanForm({ machines, userCredits = 0, userPlan = "FRE
   const clearFile = () => {
     setSelectedFile(null);
     if (fileInputRef.current) {
-      fileInputRef.current.value = ""; // Reset the actual input value
+      fileInputRef.current.value = ""; 
     }
   };
 
@@ -86,7 +87,7 @@ export default function NewScanForm({ machines, userCredits = 0, userPlan = "FRE
       return;
     }
 
-    // Validation: Ensure file is present if in File Upload mode
+    // Validation: Ensure file is present only if we are in File Upload mode
     if (submissionType === "FILE_UPLOAD" && !selectedFile) {
         toast.error("Please upload a document.");
         return;
@@ -124,87 +125,30 @@ export default function NewScanForm({ machines, userCredits = 0, userPlan = "FRE
 
           {/* --- B. INPUT METHOD --- */}
           <div className="space-y-4">
-            <Tabs defaultValue="FILE_UPLOAD" onValueChange={setSubmissionType} className="w-full">
+            
+            {/* 2. CHANGED TAB DEFAULT VALUE TO MANUAL_ENTRY */}
+            <Tabs defaultValue="MANUAL_ENTRY" onValueChange={setSubmissionType} className="w-full">
 
               <TabsList className="grid w-full grid-cols-1 md:grid-cols-2 bg-slate-950 border border-slate-800 h-auto md:h-12 p-1 gap-2 md:gap-0">
-                <TabsTrigger
-                  value="FILE_UPLOAD"
-                  className="data-[state=active]:bg-blue-600 data-[state=active]:text-white h-10 md:h-full rounded-md"
-                >
-                  <UploadCloud className="w-4 h-4 mr-2" /> Upload Logs/Docs
-                </TabsTrigger>
+                {/* 3. SWAPPED ORDER: Manual First, File Second */}
                 <TabsTrigger
                   value="MANUAL_ENTRY"
                   className="data-[state=active]:bg-blue-600 data-[state=active]:text-white h-10 md:h-full rounded-md"
                 >
                   <Activity className="w-4 h-4 mr-2" /> Manual Diagnostics
                 </TabsTrigger>
+                <TabsTrigger
+                  value="FILE_UPLOAD"
+                  className="data-[state=active]:bg-blue-600 data-[state=active]:text-white h-10 md:h-full rounded-md"
+                >
+                  <UploadCloud className="w-4 h-4 mr-2" /> Upload Logs/Docs
+                </TabsTrigger>
               </TabsList>
 
-              {/* FILE UPLOAD TAB */}
-              <TabsContent value="FILE_UPLOAD" className="mt-6 animate-in fade-in slide-in-from-top-2">
-                
-                {/* Visual Logic: Show Dropzone OR Selected File */}
-                {!selectedFile ? (
-                  <div className="border-2 border-dashed border-slate-700 rounded-lg p-12 text-center hover:border-blue-500/50 transition-colors bg-slate-950/50 relative group">
-                    <Input 
-                        ref={fileInputRef}
-                        type="file" 
-                        name="file" 
-                        accept="image/*,application/pdf" 
-                        onChange={handleFileChange}
-                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" 
-                    />
-                    <div className="flex flex-col items-center gap-4 z-10">
-                      <div className="p-4 bg-slate-900 rounded-full group-hover:bg-slate-800 transition-colors">
-                        <UploadCloud className="w-10 h-10 text-blue-400" />
-                      </div>
-                      <div className="text-slate-300">
-                        <span className="text-blue-400 font-semibold">Click to Upload</span> or drag and drop
-                      </div>
-                      <p className="text-xs text-slate-500">PDF, JPG, PNG (Max 10MB)</p>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="border border-slate-700 bg-slate-800/50 rounded-lg p-4 flex items-center justify-between animate-in fade-in zoom-in-95">
-                    <div className="flex items-center gap-4">
-                        <div className="p-3 bg-blue-500/10 rounded-lg">
-                            <FileText className="w-8 h-8 text-blue-400" />
-                        </div>
-                        <div>
-                            <p className="text-white font-medium text-sm truncate max-w-50 md:max-w-md">
-                                {selectedFile.name}
-                            </p>
-                            <p className="text-slate-500 text-xs">
-                                {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
-                            </p>
-                        </div>
-                    </div>
-                    <Button 
-                        type="button" 
-                        variant="ghost" 
-                        onClick={clearFile}
-                        className="text-slate-400 hover:text-red-400 hover:bg-red-400/10"
-                    >
-                        <X className="w-5 h-5" />
-                    </Button>
-                    
-                    {/* Hidden input to ensure FormData still picks it up if needed, though usually clearing state handles logic */}
-                    <Input 
-                        ref={fileInputRef}
-                        type="file" 
-                        name="file" 
-                        className="hidden" 
-                        onChange={handleFileChange}
-                    /> 
-                  </div>
-                )}
-              </TabsContent>
-
-              {/* UNIVERSAL MANUAL ENTRY TAB */}
+              {/* UNIVERSAL MANUAL ENTRY TAB (Now listed first in code flow for clarity) */}
               <TabsContent value="MANUAL_ENTRY" className="mt-6 animate-in fade-in slide-in-from-top-2">
                  <div className="grid gap-8 p-6 rounded-lg border border-slate-800 bg-slate-950/50">
-                  {/* ... (Same manual entry fields as before) ... */}
+                  
                   <div className="space-y-4">
                     <h3 className="text-sm font-semibold text-blue-400 uppercase tracking-wider">1. Core Telemetry</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -219,7 +163,6 @@ export default function NewScanForm({ machines, userCredits = 0, userPlan = "FRE
                     </div>
                   </div>
                   
-                  {/* ... (Keeping your existing manual fields) ... */}
                   <div className="space-y-4">
                     <h3 className="text-sm font-semibold text-blue-400 uppercase tracking-wider">2. Operational Context</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -284,6 +227,65 @@ export default function NewScanForm({ machines, userCredits = 0, userPlan = "FRE
                   </div>
                  </div>
               </TabsContent>
+
+              {/* FILE UPLOAD TAB */}
+              <TabsContent value="FILE_UPLOAD" className="mt-6 animate-in fade-in slide-in-from-top-2">
+                
+                {!selectedFile ? (
+                  <div className="border-2 border-dashed border-slate-700 rounded-lg p-12 text-center hover:border-blue-500/50 transition-colors bg-slate-950/50 relative group">
+                    <Input 
+                        ref={fileInputRef}
+                        type="file" 
+                        name="file" 
+                        accept="image/*,application/pdf" 
+                        onChange={handleFileChange}
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" 
+                    />
+                    <div className="flex flex-col items-center gap-4 z-10">
+                      <div className="p-4 bg-slate-900 rounded-full group-hover:bg-slate-800 transition-colors">
+                        <UploadCloud className="w-10 h-10 text-blue-400" />
+                      </div>
+                      <div className="text-slate-300">
+                        <span className="text-blue-400 font-semibold">Click to Upload</span> or drag and drop
+                      </div>
+                      <p className="text-xs text-slate-500">PDF, JPG, PNG (Max 10MB)</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="border border-slate-700 bg-slate-800/50 rounded-lg p-4 flex items-center justify-between animate-in fade-in zoom-in-95">
+                    <div className="flex items-center gap-4">
+                        <div className="p-3 bg-blue-500/10 rounded-lg">
+                            <FileText className="w-8 h-8 text-blue-400" />
+                        </div>
+                        <div>
+                            <p className="text-white font-medium text-sm truncate max-w-50 md:max-w-md">
+                                {selectedFile.name}
+                            </p>
+                            <p className="text-slate-500 text-xs">
+                                {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
+                            </p>
+                        </div>
+                    </div>
+                    <Button 
+                        type="button" 
+                        variant="ghost" 
+                        onClick={clearFile}
+                        className="text-slate-400 hover:text-red-400 hover:bg-red-400/10"
+                    >
+                        <X className="w-5 h-5" />
+                    </Button>
+                    
+                    <Input 
+                        ref={fileInputRef}
+                        type="file" 
+                        name="file" 
+                        className="hidden" 
+                        onChange={handleFileChange}
+                    /> 
+                  </div>
+                )}
+              </TabsContent>
+
             </Tabs>
           </div>
 
