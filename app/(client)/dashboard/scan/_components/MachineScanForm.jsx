@@ -129,7 +129,7 @@ export default function NewScanForm({ machines, userCredits = 0, userPlan = "FRE
             {/* 2. CHANGED TAB DEFAULT VALUE TO MANUAL_ENTRY */}
             <Tabs defaultValue="MANUAL_ENTRY" onValueChange={setSubmissionType} className="w-full">
 
-              <TabsList className="grid w-full grid-cols-1 md:grid-cols-2 bg-slate-950 border border-slate-800 h-auto md:h-12 p-1 gap-2 md:gap-0">
+              <TabsList className="grid w-full grid-cols-1 md:grid-cols-1 bg-slate-950 border border-slate-800 h-auto md:h-12 p-1 gap-2 md:gap-0">
                 {/* 3. SWAPPED ORDER: Manual First, File Second */}
                 <TabsTrigger
                   value="MANUAL_ENTRY"
@@ -137,12 +137,12 @@ export default function NewScanForm({ machines, userCredits = 0, userPlan = "FRE
                 >
                   <Activity className="w-4 h-4 mr-2" /> Manual Diagnostics
                 </TabsTrigger>
-                <TabsTrigger
+                {/* <TabsTrigger
                   value="FILE_UPLOAD"
                   className="data-[state=active]:bg-blue-600 data-[state=active]:text-white h-10 md:h-full rounded-md"
                 >
                   <UploadCloud className="w-4 h-4 mr-2" /> Upload Logs/Docs
-                </TabsTrigger>
+                </TabsTrigger> */}
               </TabsList>
 
               {/* UNIVERSAL MANUAL ENTRY TAB (Now listed first in code flow for clarity) */}
@@ -229,7 +229,7 @@ export default function NewScanForm({ machines, userCredits = 0, userPlan = "FRE
               </TabsContent>
 
               {/* FILE UPLOAD TAB */}
-              <TabsContent value="FILE_UPLOAD" className="mt-6 animate-in fade-in slide-in-from-top-2">
+              {/* <TabsContent value="FILE_UPLOAD" className="mt-6 animate-in fade-in slide-in-from-top-2">
                 
                 {!selectedFile ? (
                   <div className="border-2 border-dashed border-slate-700 rounded-lg p-12 text-center hover:border-blue-500/50 transition-colors bg-slate-950/50 relative group">
@@ -284,7 +284,7 @@ export default function NewScanForm({ machines, userCredits = 0, userPlan = "FRE
                     /> 
                   </div>
                 )}
-              </TabsContent>
+              </TabsContent> */}
 
             </Tabs>
           </div>
